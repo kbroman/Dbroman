@@ -1,3 +1,4 @@
+#!/usr/bin/rdmd
 /****************************************
  * readMat.d
  * Karl Broman, 31 May 2011
@@ -39,7 +40,7 @@ double [][]readMatrix(string filename)
 }
 
 
-// multiple two matrices
+// multiply two matrices
 double [][]matmult(double [][]Amat, double [][]Bmat)
 {
   auto Cmat = new double[][](Amat.length, Bmat[0].length);
@@ -68,3 +69,5 @@ void printMatrix(T)(T[][] matrix)
     write("\n");
   }
 }
+ 
+// end of readMat.d
