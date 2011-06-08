@@ -328,17 +328,9 @@ int[string][string] getTM(string[string] pairLookup, string[] prototypes, char c
 
 void writeTM(int[string][string] tm, string[] prototypes)
 {
-  string gap;
-  if(prototypes[0].length==4) {
-    gap = " ";
-  }
-  else {
-    gap = "";
-  }
-
   write("        ");
   foreach(i; prototypes) {
-    write(i, "  ", gap);
+    writef("%5s  ", i);
   }
   writeln();
 
@@ -348,7 +340,7 @@ void writeTM(int[string][string] tm, string[] prototypes)
   }
 
   foreach(i; prototypes) {
-    write(i, "  ");
+    writef("%5s  ", i);
     foreach(j; prototypes) {
       if(j in tm[i]) {
 	writef("%6.4f ", cast(double)tm[i][j]/rowSum);
@@ -370,22 +362,14 @@ void writeTMmaxima(int[string][string] tm, string[] prototypes, string label="P"
     rowSum += tm[prototypes[0]][i];
   }
 
-  string gap;
-  if(prototypes[0].length==4) {
-    gap = " ";
-  }
-  else {
-    gap = "";
-  }
-
   write("/*               ");
   foreach(i; prototypes) {
-    writef("  %s%s   ", i, gap);
+    writef("  %-5s   ", i);
   }
   writeln("*/");
 
   foreach(i; prototypes) {
-    write("/* ", i, gap, " */    [ ");
+    writef("/* %-5s */    [ ", i);
     foreach(j; prototypes) {
       if(j in tm[i]) {
 	writef("%4d/%-2d ", tm[i][j], rowSum);
