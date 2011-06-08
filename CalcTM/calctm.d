@@ -256,7 +256,7 @@ int[string][string] getTM(string[string] pairLookup, string[] prototypes)
 
 void writeTM(int[string][string] tm, string[] prototypes)
 {
-  write("       ");
+  write("        ");
   foreach(i; prototypes) {
     write(i, "  ");
   }
