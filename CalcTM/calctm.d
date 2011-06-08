@@ -32,7 +32,7 @@ void main(string[] args) {
   auto transitionMatrix = getTM(pairLookup, prototypes);
 
   if(args.length > 2 && args[2] == "maxima") {
-    writeTMmaxima(transitionMatrix, prototypes);
+    writeTMmaxima(transitionMatrix, prototypes, "P" ~ to!string(n_str));
   }
   else {
     writeTM(transitionMatrix, prototypes);
@@ -281,9 +281,9 @@ void writeTM(int[string][string] tm, string[] prototypes)
   }
 }
 
-void writeTMmaxima(int[string][string] tm, string[] prototypes)
+void writeTMmaxima(int[string][string] tm, string[] prototypes, string label="P")
 {
-  writeln("P :  matrix(");
+  writeln(label, " :  matrix(");
 
   int rowSum;
   foreach(i; tm[prototypes[0]].keys) {
