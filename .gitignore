@@ -2,3 +2,4 @@
 *.d.deps
 *~
 IO/*.bin
+CalcTM/calctm

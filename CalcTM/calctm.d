@@ -29,13 +29,14 @@ void main(string[] args) {
   auto prototypes = getPrototypes(pairLookup);
   prototypes = prototypes.sort;
 
-  writeln("No. prototypes: ", prototypes.length);
+  auto transitionMatrix = getTM(pairLookup, prototypes);
 
-  writeln(prototypes);
-
-  //  foreach(pair; pairs) {
-  //    writeln(pair, " : ", pairLookup[pair]);
-  //  }
+  if(args.length > 2 && args[2] == "maxima") {
+    writeTMmaxima(transitionMatrix, prototypes);
+  }
+  else {
+    writeTM(transitionMatrix, prototypes);
+  }
 }
 
 
@@ -234,5 +235,89 @@ string[] getPrototypes(string[string] pairLookup)
 unittest {
   assert(getPrototypes(["A":"B", "B":"B", "C":"D", "D":"D", "E":"A"]).sort == ["A", "B", "D"]);
 }
+
+
+int[string][string] getTM(string[string] pairLookup, string[] prototypes)
+{
+  int[string][string] result;
+
+  foreach(prototype; prototypes) {
+    auto offspring = getOffspring(prototype);
+    auto pairs = getPairs(offspring, "x");
+    auto n_pairs = pairs.length;
+
+    foreach(pair; pairs) {
+      ++result[prototype][pairLookup[pair]];
+    }
+  }
+
+  return result;
+}
+
+void writeTM(int[string][string] tm, string[] prototypes)
+{
+  write("       ");
+  foreach(i; prototypes) {
+    write(i, "  ");
+  }
+  writeln();
+
+  int rowSum;
+  foreach(i; tm[prototypes[0]].keys) {
+    rowSum += tm[prototypes[0]][i];
+  }
+
+  foreach(i; prototypes) {
+    write(i, "  ");
+    foreach(j; prototypes) {
+      if(j in tm[i]) {
+	writef("%6.4f ", cast(double)tm[i][j]/rowSum);
+      }
+      else {
+	writef("%6.4f ", 0.0);
+      }
+    }
+    writeln();
+  }
+}
+
+void writeTMmaxima(int[string][string] tm, string[] prototypes)
+{
+  writeln("P :  matrix(");
+
+  int rowSum;
+  foreach(i; tm[prototypes[0]].keys) {
+    rowSum += tm[prototypes[0]][i];
+  }
+
+  write("/*               ");
+  foreach(i; prototypes) {
+    writef("  %s   ", i);
+  }
+  writeln("*/");
+
+
+  foreach(i; prototypes) {
+    write("/* ", i, " */    [ ");
+    foreach(j; prototypes) {
+      if(j in tm[i]) {
+	writef("%4d/%-2d ", tm[i][j], rowSum);
+      }
+      else {
+	writef(" %4d   ", 0);
+      }
+      if(j !is prototypes[$-1]) {
+	write(", ");
+      }
+    }
+    if(i !is prototypes[$-1]) {
+      writeln("],");
+    }
+    else {
+      writeln("] )$");
+    }
+  }
+}
+
 
 /* end of calctm.d */
