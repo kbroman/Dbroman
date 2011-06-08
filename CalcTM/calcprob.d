@@ -69,41 +69,17 @@ void main(string[] args) {
   }
   assert(start in transitionMatrix);
     
-  double[string] thisgen;
-  double[string] nextgen;
+  double[string][int] probs;
 
   foreach(prototype; prototypes) {
-    thisgen[prototype] = 0.0;
+    probs[0][prototype] = 0.0;
   }
-  thisgen[start] = 1.0;
+  probs[0][start] = 1.0;
 
-  write("    ");
-  foreach(i; prototypes) {
-    writef("%9s ", i);
+  foreach(gen; 1..(n_gen+1)) {
+    probs[gen] = getNextGen(probs[gen-1], transitionMatrix);
   }
-  writeln();
-
-  writef("%2d  ", 0);
-  foreach(i; prototypes) {
-    writef("%9.7f ", thisgen[i]);
-  }
-  writeln();
-
-  foreach(gen; 0..n_gen) {
-    foreach(i; prototypes) {
-      nextgen[i] = 0.0;
-      foreach(j; prototypes) {
-	nextgen[i] += thisgen[j]*transitionMatrix[j][i];
-      }
-    }
-
-    writef("%2d  ", gen+1);
-    foreach(i; prototypes) {
-      writef("%9.7f ", nextgen[i]);
-      thisgen[i] = nextgen[i];
-    }
-    writeln();
-  }
+  writeProbs(probs, prototypes);
 
 }
 
@@ -399,6 +375,38 @@ double[string][string] getTM(string[string] pairLookup, string[] prototypes, cha
 
   return result;
 }
+
+double[string] getNextGen(double[string]thisgen, double[string][string] transitionMatrix)
+{
+  auto prototypes = thisgen.keys;
+
+  double[string] nextgen;
+  foreach(i; prototypes) {
+    nextgen[i] = 0.0;
+    foreach(j; prototypes) {
+      nextgen[i] += thisgen[j] * transitionMatrix[j][i];
+    }
+  }
+  return nextgen;
+}
+
+void writeProbs(double[string][int] probs, string[] prototypes) 
+{
+  write("    ");
+  foreach(i; prototypes) {
+    writef("%9s ", i);
+  }
+  writeln();
+
+  foreach(gen; 0..probs.length) {
+    writef("%2d  ", gen);
+    foreach(i; prototypes) {
+      writef("%9.7f ", probs[gen][i]);
+    }
+    writeln();
+  }
+}
+
 
 
 /* end of calcprob.d */
