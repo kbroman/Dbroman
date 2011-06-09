@@ -52,22 +52,22 @@ void main(string[] args) {
   else {
     if(chr_type == 'A') {
       if(n_str == 2) {
-	start = "AAxBB";
+        start = "AAxBB";
       }
       else {
-	start = "ABxCD";
+        start = "ABxCD";
       }
     }
     else {
       if(n_str == 2) {
-	start = "AAxB";
+        start = "AAxB";
       }
       else {
-	start = "ABxC";
+        start = "ABxC";
       }
     }
   }
-  assert(start in transitionMatrix);
+  assert(start in transitionMatrix, "Incompatible starting point.");
     
   double[string][int] probs;
 
@@ -79,8 +79,26 @@ void main(string[] args) {
   foreach(gen; 1..(n_gen+1)) {
     probs[gen] = getNextGen(probs[gen-1], transitionMatrix);
   }
-  writeProbs(probs, prototypes);
 
+  double[string][int] indprob;
+  string whichInd;
+  string[string] indLookup;
+  if(args.length > 5) {
+    whichInd = args[5];
+    assert((whichInd=="ind" && chr_type=='A') ||
+           ((whichInd=="female" || whichInd=="male") && chr_type=='X'),
+           "chr_type and whichInd incompatible.");
+    
+    indLookup = getIndLookup(prototypes, chr_type, n_str, whichInd);
+
+    foreach(gen; 0..(n_gen+1)) {
+      indprob[gen] = getIndProbs(probs[gen], whichInd, indLookup);
+    }
+    writeProbs(indprob, indprob[0].keys.sort);
+  }
+  else {
+    writeProbs(probs, prototypes);
+  }
 }
 
 
@@ -109,10 +127,12 @@ unittest {
 
   assert(getPairs(["AA"], ["AA"], "x") == ["AAxAA"]);
   assert(getPairs(["AA", "AB", "BB"], ["AA", "AB", "BB"], "x") == 
-	 ["AAxAA", "AAxAB", "AAxBB", "ABxAA", "ABxAB", "ABxBB", "BBxAA", "BBxAB", "BBxBB"]);
+         ["AAxAA", "AAxAB", "AAxBB", "ABxAA", "ABxAB", "ABxBB", "BBxAA", "BBxAB", "BBxBB"]);
   assert(getPairs(["AA", "AB", "BB"], ["A", "B"], "x") == 
-	 ["AAxA", "AAxB", "ABxA", "ABxB", "BBxA", "BBxB"]);
+         ["AAxA", "AAxB", "ABxA", "ABxB", "BBxA", "BBxB"]);
 }
+
+
 
 
 string[] getOffspringA(string parentpair) 
@@ -279,13 +299,13 @@ string[] getEquivPairs(string parentpair, char chr_type, int n_str)
 unittest {
   assert(getEquivPairs("AAxAA", 'A', 4).sort == ["AAxAA", "BBxBB", "CCxCC", "DDxDD"]);
   assert(getEquivPairs("AAxAB", 'A', 4).sort == ["AAxAB", "AAxBA", "ABxAA", "ABxBB", 
-					 "BAxAA", "BAxBB", "BBxAB", "BBxBA",
-					 "CCxCD", "CCxDC", "CDxCC", "CDxDD",
-					 "DCxCC", "DCxDD", "DDxCD", "DDxDC"]);
+                                         "BAxAA", "BAxBB", "BBxAB", "BBxBA",
+                                         "CCxCD", "CCxDC", "CDxCC", "CDxDD",
+                                         "DCxCC", "DCxDD", "DDxCD", "DDxDC"]);
   assert(getEquivPairs("AAxAB", 'A', 4).sort == ["AAxAB", "AAxBA", "ABxAA", "ABxBB", 
-					 "BAxAA", "BAxBB", "BBxAB", "BBxBA",
-					 "CCxCD", "CCxDC", "CDxCC", "CDxDD",
-					 "DCxCC", "DCxDD", "DDxCD", "DDxDC"]);
+                                         "BAxAA", "BAxBB", "BBxAB", "BBxBA",
+                                         "CCxCD", "CCxDC", "CDxCC", "CDxDD",
+                                         "DCxCC", "DCxDD", "DDxCD", "DDxDC"]);
 
   assert(getEquivPairs("AAxA", 'X', 2).sort == ["AAxA"]);
   assert(getEquivPairs("ABxA", 'X', 2).sort == ["ABxA","BAxA"]);
@@ -295,25 +315,96 @@ unittest {
 }
 
 
+string[] getEquivInd(string ind, char chr_type, int n_str)
+{
+  int[string] indHash;
+
+  indHash[ind] = 1;
+
+  if(!(chr_type == 'X' && n_str == 2)) {
+    // switch A<->B
+    foreach(i; indHash.keys) {
+      indHash[to!string(exchangeLetters(i, ['A':'B', 'B':'A']))] = 1;
+    }
+  }
+
+  if(chr_type == 'A' && n_str > 2) {
+    // switch C<->D
+    foreach(i; indHash.keys) {
+      indHash[to!string(exchangeLetters(i, ['C':'D', 'D':'C']))] = 1;
+    }
+
+    // switch A<->C, B<->D
+    foreach(i; indHash.keys) {
+      indHash[to!string(exchangeLetters(i, ['A':'C', 'C':'A', 'B':'D', 'D':'B']))] = 1;
+    }
+  }
+  
+  return indHash.keys;
+}
+
+unittest {
+  assert(getEquivInd("AA", 'A', 4).sort == ["AA", "BB", "CC", "DD"]);
+  assert(getEquivInd("AB", 'A', 4).sort == ["AB", "BA", "CD", "DC"]); 
+
+  assert(getEquivInd("AA", 'X', 2).sort == ["AA"]);
+  assert(getEquivInd("AB", 'X', 2).sort == ["AB"]);
+  assert(getEquivInd("AB", 'X', 4).sort == ["AB","BA"]);
+  assert(getEquivInd("AC", 'X', 4).sort == ["AC","BC"]);
+}
+
+
 string[string] getPairLookup(string[] parentpairs, char chr_type, int n_str) 
 {
-  string[] equivPairs;
   string[string] seenPairs;
 
   foreach(pair; parentpairs) {
     if(pair in seenPairs) {
       foreach(anEquivPair; getEquivPairs(pair, chr_type, n_str)) {
-	seenPairs[anEquivPair] = seenPairs[pair];
+        seenPairs[anEquivPair] = seenPairs[pair];
       }
     }
     else {
       foreach(anEquivPair; getEquivPairs(pair, chr_type, n_str)) {
-	seenPairs[anEquivPair] = pair;
+        seenPairs[anEquivPair] = pair;
       }
     }
   }
 
   return seenPairs;
+}
+
+
+string[string] getIndLookup(string[] parentpairs, char chr_type, int n_str, string whichInd) 
+{
+  string[string] seenInd;
+
+  string[] inds;
+  foreach(pair; parentpairs) {
+    inds = split(pair, regex("x"));
+    
+    if(whichInd=="female") {
+      inds = [inds[0]];
+    }
+    else if(whichInd == "male") {
+      inds = [inds[1]];
+    }
+
+    foreach(ind; inds) {
+      if(ind in seenInd) {
+        foreach(anEquivInd; getEquivInd(ind, chr_type, n_str)) {
+          seenInd[anEquivInd] = seenInd[ind];
+        }
+      }
+      else {
+        foreach(anEquivInd; getEquivInd(ind, chr_type, n_str)) {
+          seenInd[anEquivInd] = ind;
+        }
+      }
+    }
+  }
+    
+  return seenInd;
 }
 
 
@@ -368,7 +459,7 @@ double[string][string] getTM(string[string] pairLookup, string[] prototypes, cha
   foreach(i; prototypes) {
     foreach(j; prototypes) {
       if(j !in result[i]) {
-	result[i][j] = 0.0;
+        result[i][j] = 0.0;
       }
     }
   }
@@ -389,6 +480,60 @@ double[string] getNextGen(double[string]thisgen, double[string][string] transiti
   }
   return nextgen;
 }
+
+double[string] getIndProbs(double[string] pairprobs, string whichInd, string[string] indLookup)
+{
+  string[] pairs = pairprobs.keys;
+  double[string] indprob; 
+  string[] inds;
+
+  assert(whichInd == "ind" || whichInd == "female" || whichInd == "male");
+
+  double factor=1.0;
+
+  foreach(pair; pairs) {
+    inds = split(pair, regex("x"));
+
+    
+    if(whichInd=="female") {
+      inds = [inds[0]];
+    }
+    else if(whichInd == "male") {
+      inds = [inds[1]];
+    }
+    else {
+      factor = 0.5;
+    }
+
+    foreach(ind; inds) {
+      if(indLookup[ind] in indprob) {
+        indprob[indLookup[ind]] += pairprobs[pair]*factor;
+      }
+      else {
+        indprob[indLookup[ind]] = pairprobs[pair]*factor;
+      }
+    }
+  }
+
+  return indprob;
+}
+
+unittest {
+  auto x = getIndProbs(["AAxAA":0.5, "AAxAB":0.5], "ind", ["AA":"AA", "AB":"AB"]);
+  assert(x.keys.sort == ["AA","AB"]);
+  assert(x["AA"] == 0.75);
+  assert(x["AB"] == 0.25);
+
+  x = getIndProbs(["AAxA":0.5, "AAxB":0.5], "female", ["AA":"AA"]);
+  assert(x.keys == ["AA"]);
+  assert(x["AA"] == 1.0);
+
+  x = getIndProbs(["AAxA":0.5, "AAxB":0.5], "male", ["A":"A", "B":"B"]);
+  assert(x.keys.sort == ["A","B"]);
+  assert(x["A"] == 0.5);
+  assert(x["B"] == 0.5);
+}
+
 
 void writeProbs(double[string][int] probs, string[] prototypes) 
 {
