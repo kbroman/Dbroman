@@ -109,7 +109,7 @@ double [][]matmult(double [][]firstMatrix, double [][]secondMatrix)
     foreach(j; 0 .. secondMatrix[0].length) {
       result[i][j] = 0.0;
       foreach(k; 0 .. firstMatrix[0].length) {
-	result[i][j] += firstMatrix[i][k] * secondMatrix[k][j];
+        result[i][j] += firstMatrix[i][k] * secondMatrix[k][j];
       }
     }
   }

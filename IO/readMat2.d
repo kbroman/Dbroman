@@ -52,7 +52,7 @@ double [][]matmult(double [][]Amat, double [][]Bmat)
     foreach(j; 0 .. Bmat[0].length) {
       Cmat[i][j] = 0.0;
       foreach(k; 0 .. Amat[0].length) {
-	Cmat[i][j] += Amat[i][k] * Bmat[k][j];
+        Cmat[i][j] += Amat[i][k] * Bmat[k][j];
       }
     }
   }
