@@ -1,6 +1,6 @@
 /**********************************************************************
  * calctm.d
- * Karl Broman, 7 June 2011
+ * Karl Broman, 7-8 June 2011
  * 
  * calculate transition matrix for one locus, RIL by sibmating
  * 
@@ -78,9 +78,9 @@ unittest {
 
   assert(getPairs(["AA"], ["AA"], "x") == ["AAxAA"]);
   assert(getPairs(["AA", "AB", "BB"], ["AA", "AB", "BB"], "x") == 
-	 ["AAxAA", "AAxAB", "AAxBB", "ABxAA", "ABxAB", "ABxBB", "BBxAA", "BBxAB", "BBxBB"]);
+         ["AAxAA", "AAxAB", "AAxBB", "ABxAA", "ABxAB", "ABxBB", "BBxAA", "BBxAB", "BBxBB"]);
   assert(getPairs(["AA", "AB", "BB"], ["A", "B"], "x") == 
-	 ["AAxA", "AAxB", "ABxA", "ABxB", "BBxA", "BBxB"]);
+         ["AAxA", "AAxB", "ABxA", "ABxB", "BBxA", "BBxB"]);
 }
 
 
@@ -248,13 +248,13 @@ string[] getEquivPairs(string parentpair, char chr_type, int n_str)
 unittest {
   assert(getEquivPairs("AAxAA", 'A', 4).sort == ["AAxAA", "BBxBB", "CCxCC", "DDxDD"]);
   assert(getEquivPairs("AAxAB", 'A', 4).sort == ["AAxAB", "AAxBA", "ABxAA", "ABxBB", 
-					 "BAxAA", "BAxBB", "BBxAB", "BBxBA",
-					 "CCxCD", "CCxDC", "CDxCC", "CDxDD",
-					 "DCxCC", "DCxDD", "DDxCD", "DDxDC"]);
+                                         "BAxAA", "BAxBB", "BBxAB", "BBxBA",
+                                         "CCxCD", "CCxDC", "CDxCC", "CDxDD",
+                                         "DCxCC", "DCxDD", "DDxCD", "DDxDC"]);
   assert(getEquivPairs("AAxAB", 'A', 4).sort == ["AAxAB", "AAxBA", "ABxAA", "ABxBB", 
-					 "BAxAA", "BAxBB", "BBxAB", "BBxBA",
-					 "CCxCD", "CCxDC", "CDxCC", "CDxDD",
-					 "DCxCC", "DCxDD", "DDxCD", "DDxDC"]);
+                                         "BAxAA", "BAxBB", "BBxAB", "BBxBA",
+                                         "CCxCD", "CCxDC", "CDxCC", "CDxDD",
+                                         "DCxCC", "DCxDD", "DDxCD", "DDxDC"]);
 
   assert(getEquivPairs("AAxA", 'X', 2).sort == ["AAxA"]);
   assert(getEquivPairs("ABxA", 'X', 2).sort == ["ABxA","BAxA"]);
@@ -272,12 +272,12 @@ string[string] getPairLookup(string[] parentpairs, char chr_type, int n_str)
   foreach(pair; parentpairs) {
     if(pair in seenPairs) {
       foreach(anEquivPair; getEquivPairs(pair, chr_type, n_str)) {
-	seenPairs[anEquivPair] = seenPairs[pair];
+        seenPairs[anEquivPair] = seenPairs[pair];
       }
     }
     else {
       foreach(anEquivPair; getEquivPairs(pair, chr_type, n_str)) {
-	seenPairs[anEquivPair] = pair;
+        seenPairs[anEquivPair] = pair;
       }
     }
   }
@@ -343,10 +343,10 @@ void writeTM(int[string][string] tm, string[] prototypes)
     writef("%5s  ", i);
     foreach(j; prototypes) {
       if(j in tm[i]) {
-	writef("%6.4f ", cast(double)tm[i][j]/rowSum);
+        writef("%6.4f ", cast(double)tm[i][j]/rowSum);
       }
       else {
-	writef("%6.4f ", 0.0);
+        writef("%6.4f ", 0.0);
       }
     }
     writeln();
@@ -372,13 +372,13 @@ void writeTMmaxima(int[string][string] tm, string[] prototypes, string label="P"
     writef("/* %-5s */    [ ", i);
     foreach(j; prototypes) {
       if(j in tm[i]) {
-	writef("%4d/%-2d ", tm[i][j], rowSum);
+        writef("%4d/%-2d ", tm[i][j], rowSum);
       }
       else {
-	writef(" %4d   ", 0);
+        writef(" %4d   ", 0);
       }
       if(j !is prototypes[$-1]) {
-	write(", ");
+        write(", ");
       }
     }
     if(i !is prototypes[$-1]) {
