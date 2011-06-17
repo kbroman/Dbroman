@@ -272,21 +272,23 @@ string[] getEquivPairs(string parentpair, char chr_type, int n_strains, bool swa
 }
 
 unittest {
-  assert(getEquivPairs("AAxAA", 'A', 4).sort == ["AAxAA", "BBxBB", "CCxCC", "DDxDD"]);
-  assert(getEquivPairs("AAxAB", 'A', 4).sort == ["AAxAB", "AAxBA", "ABxAA", "ABxBB", 
-                                         "BAxAA", "BAxBB", "BBxAB", "BBxBA",
-                                         "CCxCD", "CCxDC", "CDxCC", "CDxDD",
-                                         "DCxCC", "DCxDD", "DDxCD", "DDxDC"]);
-  assert(getEquivPairs("AAxAB", 'A', 4).sort == ["AAxAB", "AAxBA", "ABxAA", "ABxBB", 
-                                         "BAxAA", "BAxBB", "BBxAB", "BBxBA",
-                                         "CCxCD", "CCxDC", "CDxCC", "CDxDD",
-                                         "DCxCC", "DCxDD", "DDxCD", "DDxDC"]);
+  assert(getEquivPairs("AAxAA", 'A', 4, true).sort == ["AAxAA", "BBxBB", "CCxCC", "DDxDD"]);
+  assert(getEquivPairs("AAxAB", 'A', 4, true).sort == ["AAxAB", "AAxBA", "ABxAA", "ABxBB", 
+						       "BAxAA", "BAxBB", "BBxAB", "BBxBA",
+						       "CCxCD", "CCxDC", "CDxCC", "CDxDD",
+						       "DCxCC", "DCxDD", "DDxCD", "DDxDC"]);
+  assert(getEquivPairs("AAxAB", 'A', 2, true).sort == ["AAxAB", "AAxBA", "ABxAA", "ABxBB", 
+						       "BAxAA", "BAxBB", "BBxAB", "BBxBA"]);
+  assert(getEquivPairs("AAxAB", 'A', 4, true).sort == ["AAxAB", "AAxBA", "ABxAA", "ABxBB", 
+						       "BAxAA", "BAxBB", "BBxAB", "BBxBA",
+						       "CCxCD", "CCxDC", "CDxCC", "CDxDD",
+						       "DCxCC", "DCxDD", "DDxCD", "DDxDC"]);
 
-  assert(getEquivPairs("AAxA", 'X', 2).sort == ["AAxA"]);
-  assert(getEquivPairs("ABxA", 'X', 2).sort == ["ABxA","BAxA"]);
-  assert(getEquivPairs("ABxA", 'X', 4).sort == ["ABxA","ABxB", "BAxA","BAxB"]);
-  assert(getEquivPairs("ABxC", 'X', 4).sort == ["ABxC","BAxC"]);
-  assert(getEquivPairs("ACxA", 'X', 4).sort == ["ACxA","BCxB", "CAxA", "CBxB"]);
+  assert(getEquivPairs("AAxA", 'X', 2, true).sort == ["AAxA"]);
+  assert(getEquivPairs("ABxA", 'X', 2, true).sort == ["ABxA","BAxA"]);
+  assert(getEquivPairs("ABxA", 'X', 4, true).sort == ["ABxA","ABxB", "BAxA","BAxB"]);
+  assert(getEquivPairs("ABxC", 'X', 4, true).sort == ["ABxC","BAxC"]);
+  assert(getEquivPairs("ACxA", 'X', 4, true).sort == ["ACxA","BCxB", "CAxA", "CBxB"]);
 }
 
 
