@@ -46,7 +46,7 @@ void main(string[] args) {
   string start;
   if(n_strains==2 && chr_type == 'A') {
     auto pairLookup2 = getPairLookup(pairs, chr_type, n_strains, false);
-    if(args.length > 3) {
+    if(args.length > 3 && args[3] != "maxima") {
       start = args[3];
     }
     else {
@@ -64,11 +64,13 @@ void main(string[] args) {
   auto prototypes = getPrototypes(pairLookup);
   prototypes = prototypes.sort;
 
-  assert(xiny(start, prototypes), "Starting point not a prototype.");
+  if(n_strains==2 && chr_type=='A') {
+    assert(xiny(start, prototypes), "Starting point not a prototype.");
+  }
     
   auto transitionMatrix = getTM(pairLookup, prototypes, chr_type);
 
-  if(args.length > 3 && args[3] == "maxima") {
+  if(xiny("maxima", args)) {
     writeTMmaxima(transitionMatrix, prototypes, "P" ~ to!string(n_strains));
   }
   else {
