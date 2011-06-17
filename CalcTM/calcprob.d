@@ -1,6 +1,8 @@
 /**********************************************************************
  * calcprob.d
- * Karl Broman, 8 June 2011
+ * Karl Broman
+ * first written 8 June 2011
+ * last modified 17 June 2011
  * 
  * calculate genotype probabilities at each generation for RIL by sib-mating
  * 
@@ -12,16 +14,16 @@ void main(string[] args) {
 
   assert(args.length > 3, "Give no. strains (2 or 4), chromosome type (A or X) and no. generations.");
 
-  int n_str = to!int(args[1]);
+  int n_strains = to!int(args[1]);
   char chr_type = args[2][0];
   int n_gen = to!int(args[3]);
 
   auto strains = ["A", "B", "C", "D"];
-  assert(n_str <= strains.length, "Can't use more than " ~ to!string(strains.length) ~ " strains.");
-  assert(n_str % 2 == 0, "No. strains must be multiple of 2.");
+  assert(n_strains <= strains.length, "Can't use more than " ~ to!string(strains.length) ~ " strains.");
+  assert(n_strains % 2 == 0, "No. strains must be multiple of 2.");
   assert(chr_type == 'A' || chr_type == 'X', "Chromosome type must be 'A' or 'X'.");
 
-  strains = strains[0..n_str];
+  strains = strains[0..n_strains];
 
   string[] pairs;
   if(chr_type == 'A') {
@@ -29,21 +31,16 @@ void main(string[] args) {
     pairs = getPairs(individuals, individuals, "x");
   }
   else {
-    if(n_str==4) {
+    if(n_strains==4) {
       strains = strains[0 .. 3];
-      n_str = 3;
+      n_strains = 3;
     }
     auto females = getPairs(strains, strains, "");
     auto males = strains.dup;
     pairs = getPairs(females, males, "x");
   }
 
-  auto pairLookup = getPairLookup(pairs, chr_type, n_str);
-
-  auto prototypes = getPrototypes(pairLookup);
-  prototypes = prototypes.sort;
-
-  auto transitionMatrix = getTM(pairLookup, prototypes, chr_type);
+  auto pairLookup = getPairLookup(pairs, chr_type, n_strains, true);
 
   string start;
   if(args.length > 4) {
@@ -51,7 +48,7 @@ void main(string[] args) {
   }
   else {
     if(chr_type == 'A') {
-      if(n_str == 2) {
+      if(n_strains == 2) {
         start = "AAxBB";
       }
       else {
@@ -59,7 +56,7 @@ void main(string[] args) {
       }
     }
     else {
-      if(n_str == 2) {
+      if(n_strains == 2) {
         start = "AAxB";
       }
       else {
@@ -67,8 +64,25 @@ void main(string[] args) {
       }
     }
   }
-  assert(start in transitionMatrix, "Incompatible starting point.");
-    
+  assert(start in pairLookup, "Incompatible starting point.");
+
+  // check whether to swap AB
+  if(n_strains==2 && chr_type == 'A') {
+    auto pairLookup2 = getPairLookup(pairs, chr_type, n_strains, false);
+
+    auto swapstart = exchangeLetters(start, ['A':'B', 'B':'A']);
+    if(pairLookup2[swapstart] != pairLookup2[start]) {
+      writeln("Can't swap A and B");
+      pairLookup = pairLookup2;
+    }
+  }
+
+  auto prototypes = getPrototypes(pairLookup);
+  prototypes = prototypes.sort;
+  assert(xiny(start, prototypes), "Starting point not a prototype.");
+
+  auto transitionMatrix = getTM(pairLookup, prototypes, chr_type);
+
   double[string][int] probs;
 
   foreach(prototype; prototypes) {
@@ -89,7 +103,7 @@ void main(string[] args) {
            ((whichInd=="female" || whichInd=="male") && chr_type=='X'),
            "chr_type and whichInd incompatible.");
     
-    indLookup = getIndLookup(prototypes, chr_type, n_str, whichInd);
+    indLookup = getIndLookup(prototypes, chr_type, n_strains, whichInd);
 
     foreach(gen; 0..(n_gen+1)) {
       indprob[gen] = getIndProbs(probs[gen], whichInd, indLookup);
@@ -251,7 +265,7 @@ unittest {
 }
 
 
-string[] getEquivPairs(string parentpair, char chr_type, int n_str)
+string[] getEquivPairs(string parentpair, char chr_type, int n_strains, bool swapAB)
 {
   int[string] pairHash;
 
@@ -274,14 +288,14 @@ string[] getEquivPairs(string parentpair, char chr_type, int n_str)
     pairHash[switchOneInd(pair, 0)] = 1;
   }
 
-  if(!(chr_type == 'X' && n_str == 2)) {
+  if(!(chr_type == 'X' && n_strains == 2) && swapAB) {
     // switch A<->B
     foreach(pair; pairHash.keys) {
       pairHash[to!string(exchangeLetters(pair, ['A':'B', 'B':'A']))] = 1;
     }
   }
 
-  if(chr_type == 'A' && n_str > 2) {
+  if(chr_type == 'A' && n_strains > 2) {
     // switch C<->D
     foreach(pair; pairHash.keys) {
       pairHash[to!string(exchangeLetters(pair, ['C':'D', 'D':'C']))] = 1;
@@ -315,20 +329,20 @@ unittest {
 }
 
 
-string[] getEquivInd(string ind, char chr_type, int n_str)
+string[] getEquivInd(string ind, char chr_type, int n_strains)
 {
   int[string] indHash;
 
   indHash[ind] = 1;
 
-  if(!(chr_type == 'X' && n_str == 2)) {
+  if(!(chr_type == 'X' && n_strains == 2)) {
     // switch A<->B
     foreach(i; indHash.keys) {
       indHash[to!string(exchangeLetters(i, ['A':'B', 'B':'A']))] = 1;
     }
   }
 
-  if(chr_type == 'A' && n_str > 2) {
+  if(chr_type == 'A' && n_strains > 2) {
     // switch C<->D
     foreach(i; indHash.keys) {
       indHash[to!string(exchangeLetters(i, ['C':'D', 'D':'C']))] = 1;
@@ -354,18 +368,18 @@ unittest {
 }
 
 
-string[string] getPairLookup(string[] parentpairs, char chr_type, int n_str) 
+string[string] getPairLookup(string[] parentpairs, char chr_type, int n_strains, bool swapAB) 
 {
   string[string] seenPairs;
 
   foreach(pair; parentpairs) {
     if(pair in seenPairs) {
-      foreach(anEquivPair; getEquivPairs(pair, chr_type, n_str)) {
+      foreach(anEquivPair; getEquivPairs(pair, chr_type, n_strains, swapAB)) {
         seenPairs[anEquivPair] = seenPairs[pair];
       }
     }
     else {
-      foreach(anEquivPair; getEquivPairs(pair, chr_type, n_str)) {
+      foreach(anEquivPair; getEquivPairs(pair, chr_type, n_strains, swapAB)) {
         seenPairs[anEquivPair] = pair;
       }
     }
@@ -375,7 +389,7 @@ string[string] getPairLookup(string[] parentpairs, char chr_type, int n_str)
 }
 
 
-string[string] getIndLookup(string[] parentpairs, char chr_type, int n_str, string whichInd) 
+string[string] getIndLookup(string[] parentpairs, char chr_type, int n_strains, string whichInd) 
 {
   string[string] seenInd;
 
@@ -392,12 +406,12 @@ string[string] getIndLookup(string[] parentpairs, char chr_type, int n_str, stri
 
     foreach(ind; inds) {
       if(ind in seenInd) {
-        foreach(anEquivInd; getEquivInd(ind, chr_type, n_str)) {
+        foreach(anEquivInd; getEquivInd(ind, chr_type, n_strains)) {
           seenInd[anEquivInd] = seenInd[ind];
         }
       }
       else {
-        foreach(anEquivInd; getEquivInd(ind, chr_type, n_str)) {
+        foreach(anEquivInd; getEquivInd(ind, chr_type, n_strains)) {
           seenInd[anEquivInd] = ind;
         }
       }
@@ -552,6 +566,12 @@ void writeProbs(double[string][int] probs, string[] prototypes)
   }
 }
 
-
+bool xiny(string x, string[] y)
+{
+  foreach(yv; y) {
+    if(x == yv) return(true);
+  }
+  return(false);
+}
 
 /* end of calcprob.d */

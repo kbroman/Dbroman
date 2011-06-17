@@ -1,6 +1,8 @@
 /**********************************************************************
  * calctm.d
- * Karl Broman, 7-8 June 2011
+ * Karl Broman
+ * first written 7 June 2011
+ * last modified 17 June 2011
  * 
  * calculate transition matrix for one locus, RIL by sibmating
  * 
@@ -12,15 +14,15 @@ void main(string[] args) {
 
   assert(args.length > 2, "Give no. strains (2 or 4) and chromosome type (A or X).");
 
-  int n_str = to!int(args[1]);
+  int n_strains = to!int(args[1]);
   char chr_type = args[2][0];
 
   auto strains = ["A", "B", "C", "D"];
-  assert(n_str <= strains.length, "Can't use more than " ~ to!string(strains.length) ~ " strains.");
-  assert(n_str % 2 == 0, "No. strains must be multiple of 2.");
+  assert(n_strains <= strains.length, "Can't use more than " ~ to!string(strains.length) ~ " strains.");
+  assert(n_strains % 2 == 0, "No. strains must be multiple of 2.");
   assert(chr_type == 'A' || chr_type == 'X', "Chromosome type must be 'A' or 'X'.");
 
-  strains = strains[0..n_str];
+  strains = strains[0..n_strains];
 
   string[] pairs;
   if(chr_type == 'A') {
@@ -28,24 +30,46 @@ void main(string[] args) {
     pairs = getPairs(individuals, individuals, "x");
   }
   else {
-    if(n_str==4) {
+    if(n_strains==4) {
       strains = strains[0 .. 3];
-      n_str = 3;
+      n_strains = 3;
     }
     auto females = getPairs(strains, strains, "");
     auto males = strains.dup;
     pairs = getPairs(females, males, "x");
   }
 
-  auto pairLookup = getPairLookup(pairs, chr_type, n_str);
+  auto pairLookup = getPairLookup(pairs, chr_type, n_strains, true);
+
+  // for 2 strains, autosome, allow starting point different than AAxBB
+  //    then check that A and B can be swapped
+  string start;
+  if(n_strains==2 && chr_type == 'A') {
+    auto pairLookup2 = getPairLookup(pairs, chr_type, n_strains, false);
+    if(args.length > 3) {
+      start = args[3];
+    }
+    else {
+        start = "AAxBB";
+    }
+    assert(start in pairLookup, "Incompatible starting point.");
+
+    auto swapstart = exchangeLetters(start, ['A':'B', 'B':'A']);
+    if(pairLookup2[swapstart] != pairLookup2[start]) {
+      writeln("Can't swap A and B");
+      pairLookup = pairLookup2;
+    }
+  }
 
   auto prototypes = getPrototypes(pairLookup);
   prototypes = prototypes.sort;
 
+  assert(xiny(start, prototypes), "Starting point not a prototype.");
+    
   auto transitionMatrix = getTM(pairLookup, prototypes, chr_type);
 
   if(args.length > 3 && args[3] == "maxima") {
-    writeTMmaxima(transitionMatrix, prototypes, "P" ~ to!string(n_str));
+    writeTMmaxima(transitionMatrix, prototypes, "P" ~ to!string(n_strains));
   }
   else {
     writeTM(transitionMatrix, prototypes);
@@ -200,7 +224,7 @@ unittest {
 }
 
 
-string[] getEquivPairs(string parentpair, char chr_type, int n_str)
+string[] getEquivPairs(string parentpair, char chr_type, int n_strains, bool swapAB)
 {
   int[string] pairHash;
 
@@ -223,14 +247,14 @@ string[] getEquivPairs(string parentpair, char chr_type, int n_str)
     pairHash[switchOneInd(pair, 0)] = 1;
   }
 
-  if(!(chr_type == 'X' && n_str == 2)) {
+  if(!(chr_type == 'X' && n_strains == 2) && swapAB) {
     // switch A<->B
     foreach(pair; pairHash.keys) {
       pairHash[to!string(exchangeLetters(pair, ['A':'B', 'B':'A']))] = 1;
     }
   }
 
-  if(chr_type == 'A' && n_str > 2) {
+  if(chr_type == 'A' && n_strains > 2) {
     // switch C<->D
     foreach(pair; pairHash.keys) {
       pairHash[to!string(exchangeLetters(pair, ['C':'D', 'D':'C']))] = 1;
@@ -264,19 +288,19 @@ unittest {
 }
 
 
-string[string] getPairLookup(string[] parentpairs, char chr_type, int n_str) 
+string[string] getPairLookup(string[] parentpairs, char chr_type, int n_strains, bool swapAB) 
 {
   string[] equivPairs;
   string[string] seenPairs;
 
   foreach(pair; parentpairs) {
     if(pair in seenPairs) {
-      foreach(anEquivPair; getEquivPairs(pair, chr_type, n_str)) {
+      foreach(anEquivPair; getEquivPairs(pair, chr_type, n_strains, swapAB)) {
         seenPairs[anEquivPair] = seenPairs[pair];
       }
     }
     else {
-      foreach(anEquivPair; getEquivPairs(pair, chr_type, n_str)) {
+      foreach(anEquivPair; getEquivPairs(pair, chr_type, n_strains, swapAB)) {
         seenPairs[anEquivPair] = pair;
       }
     }
@@ -390,5 +414,12 @@ void writeTMmaxima(int[string][string] tm, string[] prototypes, string label="P"
   }
 }
 
+bool xiny(string x, string[] y)
+{
+  foreach(yv; y) {
+    if(x == yv) return(true);
+  }
+  return(false);
+}
 
 /* end of calctm.d */
