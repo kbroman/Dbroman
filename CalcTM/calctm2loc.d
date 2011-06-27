@@ -2,7 +2,7 @@
  * calctm2loc.d
  * Karl Broman
  * first written 17 June 2011
- * last modified 17 June 2011
+ * last modified 27 June 2011
  * 
  * calculate transition matrix for two loci, RIL by sibmating
  * 
@@ -27,8 +27,9 @@ void main(string[] args) {
 
   string[] pairs;
   writeln("Construct individuals and pairs");
-  auto haplotypes = getPairs(strains, strains, "");
+  string[] haplotypes;
   if(chr_type == 'A') {
+    haplotypes = getPairs(strains, strains, "");
     auto individuals = getPairs(haplotypes, haplotypes, "|");
     pairs = getPairs(individuals, individuals, "x");
   }
@@ -37,6 +38,7 @@ void main(string[] args) {
       strains = strains[0 .. 3];
       n_strains = 3;
     }
+    haplotypes = getPairs(strains, strains, "");
     auto females = getPairs(haplotypes, haplotypes, "|");
     auto males = haplotypes.dup;
     pairs = getPairs(females, males, "x");
@@ -277,9 +279,15 @@ string switchLoci(string parentpair)
     return haplotypes[0] ~ "|" ~ haplotypes[1] ~ "x" ~
       haplotypes[2] ~ "|" ~ haplotypes[3];
   }
-  else {
+  else if(haplotypes.length==3) {
     return haplotypes[0] ~ "|" ~ haplotypes[1] ~ "x" ~
       haplotypes[2];
+  }
+  else if(haplotypes.length==2) {
+    return haplotypes[0] ~ "|" ~ haplotypes[1];
+  }
+  else {
+    return haplotypes[0];
   }
 }
 
