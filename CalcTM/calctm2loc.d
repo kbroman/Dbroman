@@ -4,7 +4,7 @@
  * first written 17 June 2011
  * last modified 17 June 2011
  * 
- * calculate transition matrix for one locus, RIL by sibmating
+ * calculate transition matrix for two loci, RIL by sibmating
  * 
  **********************************************************************/
 
