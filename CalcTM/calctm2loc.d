@@ -503,4 +503,4 @@ bool xiny(string x, string[] y)
   return(false);
 }
 
-/* end of calctm.d */
+/* end of calctm2loc.d */
