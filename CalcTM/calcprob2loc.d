@@ -124,6 +124,7 @@ void main(string[] args) {
     foreach(gen; 0..(n_gen+1)) {
       indprob[gen] = getIndProbs(probs[gen], whichInd, indLookup);
     }
+    writeln("    No. individuals: ", indprob[0].keys.length);
     writeProbs(indprob, indprob[0].keys.sort);
   }
   else {
