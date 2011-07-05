@@ -1,8 +1,8 @@
 /**********************************************************************
  * calctm2loc.d
  * Karl Broman
- * first written 17 June 2011
- * last modified 27 June 2011
+ * first written 5 July 2011
+ * last modified 5 July 2011
  * 
  * calculate transition matrix for two loci, RIL by sibmating
  * 
