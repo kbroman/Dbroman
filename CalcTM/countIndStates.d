@@ -49,7 +49,7 @@ void main(string[] args) {
     auto prototypes = getPrototypes(indLookup);
     writeln("No. prototypes = ", prototypes.length);
   }
-  else {
+  else if(to!int(args[3])==1) {
     auto prototypes = getPrototypeCounts(indLookup);
     writeln("No. prototypes = ", prototypes.keys.length);
     auto sorted_prototypes = prototypes.keys.sort;
@@ -59,6 +59,15 @@ void main(string[] args) {
       total += prototypes[prototype];
     }
     writeln("Total = ", total);
+  }
+  else { 
+    auto prototypes = getPrototypeCounts(indLookup);
+    writeln("No. prototypes = ", prototypes.keys.length);
+    auto sorted_prototypes = prototypes.keys.sort;
+
+    foreach(i; individuals) {
+      writefln("%5s  %5s", i, indLookup[i]);
+    }
   }
 
 }
