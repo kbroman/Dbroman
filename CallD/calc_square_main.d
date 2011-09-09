@@ -1,5 +1,5 @@
 import std.stdio;
-import calc_square;
+import calc_square_mod;
 
 
 void main()
