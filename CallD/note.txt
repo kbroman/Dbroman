@@ -1,0 +1,13 @@
+Within code:
+
+  extern(C) {  [the function] }
+
+To compile:
+
+  dmd -fPIC -c calc_square.d -L-shared
+  gcc -m32 -shared calc_square.o -o calc_square.so
+
+
+Within R: 
+
+  use .C, just like C code

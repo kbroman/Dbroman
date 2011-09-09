@@ -1,6 +1,9 @@
 *.o
+*.so
 *.d.deps
 *~
+.Rhistory
+.RData
 IO/*.bin
 CalcTM/calctm
 CalcTM/calcprob
