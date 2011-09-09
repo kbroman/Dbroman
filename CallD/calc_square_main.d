@@ -1,14 +1,6 @@
-import std.stdio, std.conv, std.algorithm;
+import std.stdio;
+import calc_square;
 
-double calc_square(double x)
-{
-  return(x*x);
-}
-
-void R_calc_square(ref double x, ref double output)
-{
-  output = calc_square(x);
-}
 
 void main()
 {
