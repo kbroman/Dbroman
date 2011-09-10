@@ -16,4 +16,4 @@ calc_square_main: calc_square_main.d calc_square.d
 	dmd calc_square_main.d calc_square.d -ofcalc_square_main 
 
 calc_squares_main: calc_squares_main.d calc_squares.d
-	dmd calc_squares_main.d calc_squares.d -ofcalc_squares 
+	dmd calc_squares_main.d calc_squares.d -ofcalc_squares_main
