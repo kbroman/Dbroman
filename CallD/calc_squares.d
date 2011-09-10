@@ -1,4 +1,5 @@
 module calc_squares_mod;
+import std.stdio;
 
 double[] calc_squares(in double[] x)
 {
@@ -9,10 +10,9 @@ double[] calc_squares(in double[] x)
   return(y);
 }
 
-extern(C) void R_calc_squares(int n, double *x, double *output)
+extern(C) void R_calc_squares(int *n, double *x, double *output)
 {
-  double[] y = x[0..n];
-  auto result = calc_squares(y);
-  output[0..n] = result;
+  double[] y = x[0..(*n)];
+  output[0..(*n)] = calc_squares(y);
 } 
 

@@ -6,7 +6,8 @@ void main()
 {
   auto y = [5.3, 7.5, 3.2, 1, 2];
   auto z = y.dup;
-  R_calc_squares(y.length, &(y[0]), &(z[0]));
+  int n = y.length;
+  R_calc_squares(&n, &(y[0]), &(z[0]));
   writeln(y);
   writeln(z);
 }
