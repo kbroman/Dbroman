@@ -5,7 +5,7 @@ double[] calc_squares(in double[] x)
 {
   auto y = x.dup;
   foreach(i, xv; x) {
-    y[i] = x[i]*x[i];
+    y[i] = xv*xv;
   }
   return(y);
 }
