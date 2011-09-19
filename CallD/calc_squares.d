@@ -10,6 +10,12 @@ double[] calc_squares(in double[] x)
   return(y);
 }
 
+unittest {
+  writeln(" --Unit test calc_squares");
+  assert(calc_squares([1.0, 2.0, 4.0]) == [1.0, 4.0, 16.0]);
+}
+
+
 extern(C) void R_calc_squares(int *n, double *x, double *output)
 {
   double[] y = x[0..(*n)];
