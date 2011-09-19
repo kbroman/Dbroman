@@ -17,3 +17,6 @@ calc_square_main: calc_square_main.d calc_square.d
 
 calc_squares_main: calc_squares_main.d calc_squares.d
 	dmd calc_squares_main.d calc_squares.d -ofcalc_squares_main
+
+clean: 
+	rm *.o *.so calc_square_main calc_squares_main
