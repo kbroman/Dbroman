@@ -16,7 +16,8 @@ calc_square_main: calc_square_main.d calc_square.d
 	dmd -unittest calc_square_main.d calc_square.d -ofcalc_square_main 
 
 calc_squares_main: calc_squares_main.d calc_squares.d
-	dmd -unittest calc_squares_main.d calc_squares.d -ofcalc_squares_main -L/usr/lib/libR.dylib
+	dmd -unittest calc_squares_main.d calc_squares.d -ofcalc_squares_main
+# to include R library, for calling R functions from D: -L/usr/lib/libR.dylib
 
 clean: 
 	rm *.o *.so calc_square_main calc_squares_main
