@@ -13,7 +13,7 @@ function(x)
 }
 
 calc.squares <-
-function(x, method=c("A","B","direct"))
+function(x, method=c("A","A2","A2p", "A2pp", "B","direct"))
 {
   method <- match.arg(method)
   Rfunc <- paste("R_calc_squares_", method, sep="")
