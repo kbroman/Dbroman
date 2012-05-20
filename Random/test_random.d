@@ -30,4 +30,21 @@ unittest {
   }
   writeln();
 
+  gen.seed(unpredictableSeed);
+  writeln("dice:");
+  foreach(i; 0..30)
+    writef("%d", dice(gen, 1, 1));
+  writeln;
+  foreach(i; 0..30)
+    writef("%d", dice(gen, 1, 1, 1));
+  writeln();
+
+  gen.seed(87513765);
+  writeln("dice:");
+  foreach(i; 0..30)
+    writef("%d", dice(gen, 1, 1));
+  writeln;
+  foreach(i; 0..30)
+    writef("%d", dice(gen, 25, 25, 25));
+  writeln();
 }
