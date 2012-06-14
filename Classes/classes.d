@@ -17,14 +17,14 @@ class Cross {
 
 class BC : Cross {
   this() { cross_type = "BC"; }
-  
+
   double myfuncA() { return 1.0; }
   double myfuncB() { return myfuncA; }
 }
 
 class F2 : Cross {
   this() { cross_type = "F2"; }
-  
+
   double myfuncA() { return 2.0; }
   double myfuncB() { return 3.0; }
 }
@@ -48,10 +48,12 @@ double anotherfunc(Cross cross, string which)
   case "B": return cross.myfuncB();
   default: throw new Exception("which = \"" ~ which ~ "\" not supported.");
   }
-}  
+}
 
 
 unittest {
+  writeln("Unit test " ~ __FILE__);
+
   auto bc = form_cross("BC");
   auto f2 = form_cross("F2");
 
