@@ -55,15 +55,18 @@ unittest {
   auto bc = form_cross("BC");
   auto f2 = form_cross("F2");
 
-  writeln("bc.myfuncA(): ", bc.myfuncA());
-  writeln("bc.myfuncB(): ", bc.myfuncB());
-  writeln;
-  writeln("f2.myfuncA(): ", f2.myfuncA());
-  writeln("f2.myfuncB(): ", f2.myfuncB());
-  writeln;
-  writeln("anotherfunc(bc, \"A\"): ", anotherfunc(bc, "A"));
-  writeln("anotherfunc(bc, \"B\"): ", anotherfunc(bc, "B"));
-  writeln;
-  writeln("anotherfunc(f2, \"A\"): ", anotherfunc(f2, "A"));
-  writeln("anotherfunc(f2, \"B\"): ", anotherfunc(f2, "B"));
+  assert(bc.cross_type == "BC");
+  assert(f2.cross_type == "F2");
+
+  assert(bc.myfuncA() == 1);
+  assert(bc.myfuncB() == 1);
+
+  assert(f2.myfuncA() == 2);
+  assert(f2.myfuncB() == 3);
+
+  assert(anotherfunc(bc, "A") == 1);
+  assert(anotherfunc(bc, "B") == 1);
+
+  assert(anotherfunc(f2, "A") == 2);
+  assert(anotherfunc(f2, "B") == 3);
 }
